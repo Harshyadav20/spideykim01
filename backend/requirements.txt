@@ -1,0 +1,14 @@
+# Core API server (vendored into backend/vendor by scripts/ensure_deps.sh,
+# or install into a venv with: pip install -r requirements.txt)
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9
+
+# Local speech-to-text (offline, word-level timestamps).
+# For higher-quality transcripts you can instead/also install:
+#   pip install faster-whisper   (auto-detected and preferred when present)
+vosk>=0.0.45
+
+# Optional extras (no install needed by default):
+#   httpx        — only if you extend the AI service
+#   faster-whisper — best-quality local STT (base model, ~150 MB)

@@ -1,0 +1,123 @@
+{
+ "_comment": "Meme presets (one click = style + caption text + meme insert + sting) and the Vlipsy search recipes used by scripts/fetch_packs.py. Presets without \"meme\" work fully offline.",
+ "version": 1,
+ "vlipsy_queries": [
+  {"q": "shocked", "id": "shocked", "tags": ["shock", "reaction"], "limit": 2},
+  {"q": "confused", "id": "confused", "tags": ["confused", "reaction"], "limit": 2},
+  {"q": "mind blown", "id": "mind-blown", "tags": ["wow", "reaction"], "limit": 2},
+  {"q": "deal with it", "id": "deal-with-it", "tags": ["attitude"], "limit": 1},
+  {"q": "this is fine", "id": "this-is-fine", "tags": ["chaos", "funny"], "limit": 1},
+  {"q": "bruh", "id": "bruh", "tags": ["fail", "funny"], "limit": 2},
+  {"q": "lets go", "id": "lets-go", "tags": ["hype", "celebration"], "limit": 2},
+  {"q": "no way", "id": "no-way", "tags": ["shock", "reaction"], "limit": 2},
+  {"q": "laughing", "id": "laughing", "tags": ["laugh", "funny"], "limit": 2},
+  {"q": "sad violin", "id": "sad", "tags": ["sad", "fail"], "limit": 1},
+  {"q": "dramatic zoom", "id": "dramatic-zoom", "tags": ["drama", "reaction"], "limit": 2},
+  {"q": "applause", "id": "applause", "tags": ["celebration", "win"], "limit": 1},
+  {"q": "awkward", "id": "awkward", "tags": ["awkward", "cringe"], "limit": 2},
+  {"q": "facepalm", "id": "facepalm", "tags": ["fail", "funny"], "limit": 2}
+ ],
+ "vlipsy_sound_queries": [
+  {"q": "boom", "id": "boom", "limit": 1},
+  {"q": "record scratch", "id": "vinyl-scratch", "limit": 1},
+  {"q": "vine boom", "id": "vine-boom", "limit": 1},
+  {"q": "laugh track", "id": "laugh-track", "limit": 1}
+ ],
+ "presets": [
+  {
+   "id": "impact-top-bottom",
+   "name": "Impact top/bottom",
+   "emoji": "\ud83c\udfac",
+   "description": "Classic caption-meme layout: setup line on top, punchline at the bottom. No downloads needed.",
+   "tags": ["offline", "captions", "classic"],
+   "requires": null,
+   "options": {"style": "meme", "caption_position": "bottom"},
+   "text": [
+    {"text": "TOP TEXT", "y": "top", "size": 1.25, "duration": 2.6, "color": "#FFFFFF", "box": false, "anim": "pop"},
+    {"text": "BOTTOM TEXT", "y": "bottom", "size": 1.25, "duration": 2.6, "color": "#FFFFFF", "box": false, "anim": "pop"}
+   ],
+   "sfx": ["text"],
+   "fx": []
+  },
+  {
+   "id": "sticker-band",
+   "name": "Sticker band",
+   "emoji": "\ud83e\ude79",
+   "description": "Meme clip parked as a band with the voice-over captions still readable on top.",
+   "tags": ["meme", "layout"],
+   "requires": "memes",
+   "options": {"style": "storytime", "caption_position": "top", "aspect": "blur"},
+   "meme": {"match": ["reaction", "funny", "shock"], "duration": 2.0, "fit": "band", "anim": "pop", "volume": 0.55},
+   "sfx": ["meme"],
+   "fx": []
+  },
+  {
+   "id": "reaction-cut",
+   "name": "Reaction cut-in",
+   "emoji": "\ud83d\ude31",
+   "description": "Full-frame meme punch-in with a boom sting and a shake.",
+   "tags": ["meme", "reaction"],
+   "requires": "memes",
+   "options": {"style": "meme", "zoom": "punch"},
+   "meme": {"match": ["shock", "surprise", "reaction"], "duration": 1.4, "fit": "cover", "anim": "pop", "volume": 0.8, "sting": true},
+   "fx": [{"kind": "vfx", "name": "shake", "duration": 0.7, "intensity": 0.7}]
+  },
+  {
+   "id": "record-scratch",
+   "name": "Record scratch",
+   "emoji": "\ud83d\udcbf",
+   "description": "Everything stops: scratch sting, freeze-frame meme, quick zoom back in.",
+   "tags": ["meme", "comedy"],
+   "requires": "memes",
+   "options": {"style": "meme", "caption_animation": "typewriter"},
+   "meme": {"match": ["confused", "awkward", "reaction"], "duration": 1.6, "fit": "cover", "anim": "pop", "volume": 0.7, "sting": false},
+   "sfx": ["meme"],
+   "fx": [{"kind": "vfx", "name": "glitch", "duration": 0.5}]
+  },
+  {
+   "id": "deep-fried",
+   "name": "Deep fried",
+   "emoji": "\ud83c\udf5f",
+   "description": "Max saturation, grain, shake and a chaotic meme cut. Loud on purpose.",
+   "tags": ["meme", "chaos"],
+   "requires": "memes",
+   "options": {"style": "meme", "vfx": ["saturate", "grain", "shake"], "vfx_intensity": 0.85, "zoom": "punch"},
+   "meme": {"match": ["chaos", "funny", "fail"], "duration": 1.2, "fit": "cover", "anim": "pop", "volume": 0.75},
+   "sfx": ["meme", "reaction"],
+   "fx": [{"kind": "vfx", "name": "saturate", "duration": 3.0, "intensity": 0.9}]
+  },
+  {
+   "id": "boom-zoom",
+   "name": "Boom + punch zoom",
+   "emoji": "\ud83d\udca5",
+   "description": "Bass boom on the hook beat with punch zooms and a flash. Works with the built-in pack.",
+   "tags": ["offline", "impact", "hype"],
+   "requires": null,
+   "options": {"style": "beast", "zoom": "punch", "vfx": ["flash"]},
+   "sfx": ["hook", "punch"],
+   "fx": [{"kind": "vfx", "name": "flash", "duration": 0.4, "intensity": 0.7}]
+  },
+  {
+   "id": "sparkle-dream",
+   "name": "Sparkle dream",
+   "emoji": "\u2728",
+   "description": "Glitter overlay, sparkle sting and a soft push-in for wholesome moments.",
+   "tags": ["offline", "aesthetic"],
+   "requires": null,
+   "options": {"style": "clean", "zoom": "slow", "overlay": "glitter", "overlay_opacity": 0.45},
+   "sfx": ["reaction"],
+   "fx": []
+  },
+  {
+   "id": "glitch-drop",
+   "name": "Glitch drop",
+   "emoji": "\ud83c\udf10",
+   "description": "Sub drop, RGB glitch window and a hard cut — the tech/hacker transition.",
+   "tags": ["offline", "digital"],
+   "requires": null,
+   "options": {"style": "glitch", "vfx": ["glitch", "grain"], "vfx_intensity": 0.7},
+   "sfx": ["outro", "glitch"],
+   "fx": [{"kind": "vfx", "name": "glitch", "duration": 0.8, "intensity": 0.8}]
+  }
+ ]
+}

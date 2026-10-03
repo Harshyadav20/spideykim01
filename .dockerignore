@@ -1,0 +1,45 @@
+# Keep the build context small and the image reproducible.
+.git
+.gitignore
+.github
+node_modules
+**/node_modules
+
+# Python caches / local deps (installed properly inside the image)
+__pycache__
+**/__pycache__
+*.pyc
+.venv
+venv
+backend/vendor
+
+# Runtime data — never bake uploads, renders or the sqlite db into an image
+backend/uploads
+backend/renders
+backend/captions
+backend/chunks
+backend/data
+backend/static
+backend/.env
+*.db
+*.db-wal
+*.db-shm
+
+# Fetched packs (Pixabay / Vlipsy) are licensed for use, not redistribution, so
+# they are never baked into the image — mount them instead:
+#   docker run -v $PWD/assets/memes:/app/assets/memes -v $PWD/assets/sfx/vfx:/app/assets/sfx/vfx …
+assets/memes/*
+!assets/memes/.gitkeep
+assets/sfx/vfx/*
+!assets/sfx/vfx/.gitkeep
+
+# Local / editor noise
+*.log
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+docs
+docker-compose.yml
+Dockerfile
+.dockerignore

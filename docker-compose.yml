@@ -1,0 +1,22 @@
+# Local container run:  docker compose up --build  →  http://localhost:8000
+services:
+  clipper-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: clipper-ai:local
+    ports:
+      - "8000:8000"
+    environment:
+      PORT: "8000"
+      DATA_DIR: /var/data
+      MAX_UPLOAD_MB: "2048"
+      # GEMINI_API_KEY: ""            # optional — free key enables AI clip picking
+      # OLLAMA_BASE_URL: "http://host.docker.internal:11434"
+    volumes:
+      # Projects, renders and the SQLite db survive container rebuilds.
+      - clipper-data:/var/data
+    restart: unless-stopped
+
+volumes:
+  clipper-data:
