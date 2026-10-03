@@ -8,7 +8,8 @@ venv/
 backend/uploads/
 backend/renders/
 backend/captions/
-backend/chunks/          # partial chunked uploads
+# partial chunked uploads (in-flight slices of an upload)
+backend/chunks/
 backend/data/
 backend/vendor/
 backend/static/
