@@ -140,6 +140,28 @@ def test_build_never_overwrites_a_real_clip(tmp_path):
     assert result["created"] == ["shocked"] and calls, "--overwrite should replace it"
 
 
+def test_build_spares_a_placeholder_that_was_replaced_by_hand(tmp_path):
+    """Dropping a real clip on a placeholder filename must not lose it.
+
+    The manifest still says "placeholder", so the size recorded when we wrote
+    the file is what tells us it is no longer ours.
+    """
+    calls: list = []
+    meme_pack.build(tmp_path, only=["bruh"], stings=False, runner=_fake_runner(calls))
+    dropped_in = tmp_path / "bruh.mp4"
+    dropped_in.write_bytes(b"MY REAL CLIP")            # same name, different file
+
+    result = meme_pack.build(tmp_path, only=["bruh"], force=True, stings=False,
+                            runner=_fake_runner(calls))
+    assert result["protected"] == ["bruh"], "a replaced placeholder is not ours any more"
+    assert result["created"] == []
+    assert dropped_in.read_bytes() == b"MY REAL CLIP"
+
+    manifest = json.loads((tmp_path / "pack.json").read_text())
+    kept = next(f for f in manifest["files"] if f["id"] == "bruh")
+    assert kept["source"] == "local", "an unlabelled file must not claim to be ours"
+
+
 def test_build_keeps_existing_placeholders_and_force_rewrites_them(tmp_path):
     calls: list = []
     first = meme_pack.build(tmp_path, only=["bruh"], stings=False,

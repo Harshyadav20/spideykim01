@@ -294,7 +294,13 @@ def read_manifest(folder: Path | None = None) -> dict:
 
 
 def protected(folder: Path | None = None) -> set[str]:
-    """Ids on disk that are *not* placeholders — real clips, keep out."""
+    """Ids on disk that are *not* ours — real clips, or hand-edited files.
+
+    A file counts as a placeholder only if the manifest says so *and* its size
+    still matches what we wrote. Anything else (a fetched clip, a file you
+    dropped in, an unlabelled folder) is left alone, `--force` included: the
+    only way past this is `overwrite=True`.
+    """
     folder = Path(folder or config.MEMES_DIR)
     entries = read_manifest(folder)["files"]
     out = set()
@@ -304,39 +310,63 @@ def protected(folder: Path | None = None) -> set[str]:
         entry = entries.get(f.stem) if isinstance(entries, dict) else None
         if not entry or str((entry or {}).get("source", "")).lower() != "placeholder":
             out.add(f.stem)
+            continue
+        recorded = entry.get("size")
+        try:
+            if recorded is None or f.stat().st_size != int(recorded):
+                out.add(f.stem)
+        except (OSError, TypeError, ValueError):
+            out.add(f.stem)
     return out
 
 
-def _write_manifest(folder: Path, keep: dict | None = None) -> Path:
+def _write_manifest(folder: Path, ours: set[str] | None = None) -> Path:
     """Write `pack.json` — deterministic (no timestamp), so reruns are quiet.
 
-    Entries for files this module did not generate are carried over verbatim
-    (that is how a fetched Vlipsy clip keeps its credit after a placeholder
-    run); anything else on disk is reported as `local`, never as a placeholder.
+    Three cases per file: one of ours (labelled `placeholder` with the size we
+    wrote), a real download whose credit is carried over verbatim, or a file we
+    know nothing about (`local`).
+
+    `ours` is the set of ids this run generated or verified; anything else on
+    disk keeps whatever credit it already had, or is reported as `local`. When
+    `ours` is None the caller is claiming the whole folder (a plain
+    `_write_manifest(folder)` after generating by hand), and only entries that
+    already carry a real source are preserved.
     """
-    entries = {r["id"]: r for r in recipes("clip") + recipes("sting")}
-    previous = (keep or read_manifest(folder)).get("files") or {}
+    recipes_by_id = {r["id"]: r for r in recipes("clip") + recipes("sting")}
+    previous = read_manifest(folder).get("files") or {}
     files = []
     for f in sorted(folder.iterdir()):
         if not f.is_file() or f.suffix.lower() not in VIDEO_EXTS + AUDIO_EXTS:
             continue
         old = previous.get(f.stem) if isinstance(previous, dict) else None
-        recipe = entries.get(f.stem)
-        if old and str(old.get("source", "")).lower() != "placeholder":
-            files.append({**old, "file": f.name})       # real file: keep credit
-            continue
-        if recipe:
+        old_source = str((old or {}).get("source", "")).lower()
+        real = bool(old) and old_source not in ("", "placeholder")
+        recipe = recipes_by_id.get(f.stem)
+        # who owns this file: the caller's set, or everything uncredited when
+        # the caller claims the folder
+        ours_here = (not real) if ours is None else (f.stem in ours)
+        if ours_here:
             files.append({
-                "id": f.stem, "file": f.name, "label": recipe["label"],
-                "kind": recipe["kind"], "category": recipe["category"],
-                "tags": recipe["tags"], "source": "placeholder",
-                "license": "CC0 (generated in-repo)",
+                "id": f.stem, "file": f.name,
+                "label": recipe["label"] if recipe else f.stem.replace("-", " ").title(),
+                "kind": recipe["kind"] if recipe else (
+                    "video" if f.suffix.lower() in VIDEO_EXTS else "audio"),
+                "category": recipe["category"] if recipe else "meme",
+                "tags": recipe["tags"] if recipe else [],
+                "source": "placeholder" if recipe else "local",
+                "license": "CC0 (generated in-repo)" if recipe else "",
+                # the size we produced: a different one means the file is no
+                # longer ours (someone dropped a real clip on the same name)
+                "size": f.stat().st_size,
             })
+        elif real:
+            files.append({**old, "file": f.name})      # a download: keep its credit
         else:
-            files.append({"id": f.stem, "file": f.name,
+            files.append({"id": f.stem, "file": f.name, "source": "local",
                           "label": f.stem.replace("-", " ").replace("_", " ").title(),
                           "kind": "video" if f.suffix.lower() in VIDEO_EXTS else "audio",
-                          "category": "meme", "source": "local"})
+                          "category": "meme", "tags": [], "size": f.stat().st_size})
     manifest = {
         "id": "memes",
         "label": "Offline meme placeholders",
@@ -416,7 +446,7 @@ def build(folder: Path | None = None, force: bool = False,
                 created.append(sid)
             else:
                 failed.append({"id": sid, "error": err or "unknown error"})
-    _write_manifest(folder)
+    _write_manifest(folder, ours=set(created) | set(kept))
     return {
         "folder": str(folder),
         "created": created,
