@@ -1,0 +1,83 @@
+{
+ "_comment": "Semantic SFX cues + the Pixabay search recipes used by scripts/fetch_packs.py. Cues are resolved against whatever is installed: a fetched Pixabay pack wins over the offline-synthesized kit, which wins over the built-in whoosh/pop.",
+ "version": 1,
+ "cues": {
+  "hook": {
+   "label": "Hook sting",
+   "description": "Lands on the first frame to grab attention",
+   "sounds": ["boom", "impact", "whoosh"],
+   "builtin": ["whoosh"]
+  },
+  "punch": {
+   "label": "Zoom punch",
+   "description": "Fires on every punch-in / caption pop",
+   "sounds": ["punch", "impact", "pop", "ding"],
+   "builtin": ["pop"]
+  },
+  "meme": {
+   "label": "Meme sting",
+   "description": "Classic 'wait, what?' punctuation for a meme insert",
+   "sounds": ["boom", "vinyl-scratch", "record-stop", "glitch"],
+   "builtin": ["pop"]
+  },
+  "reaction": {
+   "label": "Reaction",
+   "description": "Crowd / sparkle reaction for funny or wholesome beats",
+   "sounds": ["cheer", "sparkle", "vinyl-scratch"],
+   "builtin": []
+  },
+  "text": {
+   "label": "Text pop",
+   "description": "Tiny tick when a text card or word appears",
+   "sounds": ["pop", "typewriter", "ding"],
+   "builtin": ["pop"]
+  },
+  "transition": {
+   "label": "Transition",
+   "description": "Swipe / whoosh across a cut",
+   "sounds": ["whoosh", "swipe", "glitch"],
+   "builtin": ["whoosh"]
+  },
+  "riser": {
+   "label": "Riser",
+   "description": "Build-up into the reveal",
+   "sounds": ["riser", "whoosh-slow"],
+   "builtin": ["whoosh"]
+  },
+  "outro": {
+   "label": "Outro",
+   "description": "Falling tone to close the clip",
+   "sounds": ["downlifter", "sub-drop"],
+   "builtin": ["pop"]
+  },
+  "glitch": {
+   "label": "Glitch",
+   "description": "Digital corruption on a glitch VFX window",
+   "sounds": ["glitch", "static", "error"],
+   "builtin": []
+  }
+ },
+ "packs": {
+  "builtin": {"label": "Built-in stings"},
+  "vfx": {"label": "VFX pack", "source": "assets/sfx/vfx"}
+ },
+ "pixabay_queries": [
+  {"q": "vine boom sound effect", "id": "boom", "category": "impact", "limit": 2, "min_seconds": 0.4, "max_seconds": 2.0},
+  {"q": "cinematic impact hit", "id": "impact", "category": "impact", "limit": 2, "min_seconds": 0.2, "max_seconds": 2.0},
+  {"q": "bass drop", "id": "sub-drop", "category": "impact", "limit": 2, "min_seconds": 0.8, "max_seconds": 4.0},
+  {"q": "whoosh transition", "id": "whoosh", "category": "transition", "limit": 3, "min_seconds": 0.2, "max_seconds": 2.0},
+  {"q": "swoosh air", "id": "whoosh-slow", "category": "transition", "limit": 2, "min_seconds": 0.6, "max_seconds": 3.0},
+  {"q": "swipe ui", "id": "swipe", "category": "transition", "limit": 2, "min_seconds": 0.1, "max_seconds": 1.5},
+  {"q": "riser tension build up", "id": "riser", "category": "build", "limit": 2, "min_seconds": 0.8, "max_seconds": 5.0},
+  {"q": "downlifter fall", "id": "downlifter", "category": "build", "limit": 2, "min_seconds": 0.5, "max_seconds": 3.0},
+  {"q": "record scratch", "id": "vinyl-scratch", "category": "meme", "limit": 2, "min_seconds": 0.3, "max_seconds": 3.0},
+  {"q": "tape stop", "id": "record-stop", "category": "meme", "limit": 1, "min_seconds": 0.4, "max_seconds": 3.0},
+  {"q": "crowd cheer", "id": "cheer", "category": "meme", "limit": 2, "min_seconds": 0.8, "max_seconds": 5.0},
+  {"q": "glitch digital", "id": "glitch", "category": "digital", "limit": 2, "min_seconds": 0.2, "max_seconds": 3.0},
+  {"q": "camera flash", "id": "camera-flash", "category": "accent", "limit": 1, "min_seconds": 0.1, "max_seconds": 2.0},
+  {"q": "pop notification", "id": "pop", "category": "accent", "limit": 2, "min_seconds": 0.1, "max_seconds": 1.5},
+  {"q": "bell ding", "id": "ding", "category": "accent", "limit": 1, "min_seconds": 0.2, "max_seconds": 3.0},
+  {"q": "sparkle magic", "id": "sparkle", "category": "accent", "limit": 2, "min_seconds": 0.3, "max_seconds": 3.0},
+  {"q": "typewriter click", "id": "typewriter", "category": "accent", "limit": 1, "min_seconds": 0.05, "max_seconds": 1.0}
+ ]
+}

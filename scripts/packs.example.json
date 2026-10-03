@@ -1,0 +1,39 @@
+{
+ "_comment": "Template for `python3 scripts/fetch_packs.py --urls scripts/packs.example.json`. Use it when Pixabay/Vlipsy block automated downloads: open the clip in your browser, copy the direct media link (right-click → copy link/address of the file, or the cdn.pixabay.com / media.vlipsy.com URL), and paste it here. `kind` is audio|video, `dir` may point anywhere (defaults: audio → assets/sfx/vfx, video → assets/memes). Nothing here is downloaded by the app itself.",
+ "files": [
+  {
+   "id": "boom",
+   "url": "https://cdn.pixabay.com/audio/2022/03/10/audio_1cc0f2ec5b.mp3",
+   "kind": "audio",
+   "category": "impact",
+   "label": "Vine boom",
+   "source": "pixabay",
+   "license": "Pixabay Content License",
+   "credit": "Pixabay"
+  },
+  {
+   "id": "whoosh",
+   "url": "https://cdn.pixabay.com/audio/2021/08/09/audio_9f0f7b3d21.mp3",
+   "kind": "audio",
+   "category": "transition",
+   "label": "Fast whoosh"
+  },
+  {
+   "id": "shocked",
+   "url": "https://media.vlipsy.com/example/shocked.mp4",
+   "kind": "video",
+   "category": "meme",
+   "label": "Shocked reaction",
+   "source": "vlipsy",
+   "license": "Vlipsy — check clip terms"
+  },
+  {
+   "id": "vine-boom",
+   "url": "https://media.vlipsy.com/example/vine-boom.mp3",
+   "kind": "audio",
+   "dir": "assets/memes",
+   "category": "meme",
+   "label": "Vine boom sting"
+  }
+ ]
+}

@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Backend runtime data (uploads, renders, transcripts, db)
+backend/uploads/
+backend/renders/
+backend/captions/
+backend/chunks/          # partial chunked uploads
+backend/data/
+backend/vendor/
+backend/static/
+backend/.env
+
+# Speech model downloaded at build time (Docker/Render) — never commit it
+assets/models/
+
+# ── Fetched asset packs (download them, don't redistribute them) ──────────
+# The Pixabay Content License and Vlipsy's terms allow *use*, not
+# redistribution, so fetched media stays out of git. The generated CC0 kit in
+# assets/sfx/kit/ IS committed, so a fresh clone still has boom/whoosh/riser…
+assets/memes/*
+!assets/memes/.gitkeep
+assets/sfx/vfx/*
+!assets/sfx/vfx/.gitkeep
+
+# Vendored heavy deps are re-fetched by scripts/ensure_deps.sh
+
+# Node / frontend
+node_modules/
+frontend/dist/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# SQLite database + WAL sidecar files
+backend/app.db
+backend/app.db-wal
+backend/app.db-shm

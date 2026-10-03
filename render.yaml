@@ -1,0 +1,61 @@
+# Render Blueprint for Clipper AI — https://render.com/docs/blueprint-spec
+#
+# Deploy:  Render dashboard → New → Blueprint → pick this repository.
+# Render builds ./Dockerfile (React SPA + FastAPI + FFmpeg + offline STT) and
+# gives you a public URL like https://clipper-ai.onrender.com
+#
+# Optional AI keys are prompted for at deploy time (leave blank to run fully
+# offline with the built-in heuristic clip finder).
+services:
+  - type: web
+    name: clipper-ai
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      # Free instances have an ephemeral filesystem — say so in the UI.
+      # Remove this line once you attach a disk (see below).
+      - key: EPHEMERAL_STORAGE
+        value: "1"
+      - key: DEPLOY_TARGET
+        value: render
+      # Keep uploads small on the free tier (512 MB RAM / 0.1 CPU).
+      # Raise to 2048 on a paid instance or when running locally.
+      - key: MAX_UPLOAD_MB
+        value: "200"
+      # Optional: free Gemini key from https://aistudio.google.com/apikey
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.0-flash
+      # Optional: point at an Ollama server for fully-offline AI clip finding
+      - key: OLLAMA_BASE_URL
+        sync: false
+      # ── Asset packs (meme clips + VFX sounds) ───────────────────────────────
+      # The offline VFX kit (assets/sfx/kit) is committed, so meme edits work
+      # with no keys. The *fetched* packs are licensed for use, not
+      # redistribution, so they are never in the image: run
+      #   python3 scripts/fetch_packs.py --sound        (no key needed)
+      #   VLIPSY_API_KEY=… python3 scripts/fetch_packs.py --memes --sounds
+      # in the Render Shell, then POST /api/packs/refresh. See docs/PACKS.md.
+      - key: VLIPSY_API_KEY
+        sync: false
+      # On a paid plan with a disk, keep the fetched packs across deploys:
+      # - key: MEMES_DIR
+      #   value: /var/data/memes
+      # - key: SFX_PACK_DIR
+      #   value: /var/data/sfx/vfx
+
+# ── Durable storage (paid plans) ──────────────────────────────────────────────
+# On the free plan uploads and renders are wiped whenever the service restarts.
+# Attach a disk to keep projects across deploys, then delete EPHEMERAL_STORAGE:
+#
+#    plan: starter
+#    disk:
+#      name: clipper-data
+#      mountPath: /var/data
+#      sizeGB: 5

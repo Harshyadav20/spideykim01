@@ -1,0 +1,210 @@
+{
+ "id": "vfx",
+ "source": "synthesized",
+ "label": "Offline VFX kit",
+ "license": "CC0 (generated in-repo)",
+ "url": "https://pixabay.com/sound-effects/search/vfx/",
+ "cues": {
+  "hook": [
+   "boom",
+   "impact",
+   "whoosh"
+  ],
+  "punch": [
+   "punch",
+   "impact",
+   "ding"
+  ],
+  "meme": [
+   "boom",
+   "vinyl-scratch",
+   "record-stop",
+   "glitch"
+  ],
+  "text": [
+   "pop",
+   "ding",
+   "typewriter"
+  ],
+  "transition": [
+   "whoosh",
+   "swipe",
+   "glitch"
+  ],
+  "riser": [
+   "riser",
+   "whoosh-slow"
+  ],
+  "outro": [
+   "downlifter",
+   "sub-drop"
+  ],
+  "reaction": [
+   "cheer",
+   "sparkle",
+   "vinyl-scratch"
+  ]
+ },
+ "files": [
+  {
+   "id": "boom",
+   "file": "boom.wav",
+   "label": "Boom",
+   "category": "impact",
+   "source": "synthesized",
+   "license": "CC0 (generated in-repo, no attribution required)"
+  },
+  {
+   "id": "camera-flash",
+   "file": "camera-flash.wav",
+   "label": "Camera flash",
+   "category": "accent",
+   "source": "synthesized",
+   "license": "CC0 (generated in-repo, no attribution required)"
+  },
+  {
+   "id": "cheer",
+   "file": "cheer.wav",
+   "label": "Crowd cheer",
+   "category": "meme",
+   "source": "synthesized",
+   "license": "CC0 (generated in-repo, no attribution required)"
+  },
+  {
+   "id": "ding",
+   "file": "ding.wav",
+   "label": "Ding",
+   "category": "accent",
+   "source": "synthesized",
+   "license": "CC0 (generated in-repo, no attribution required)"
+  },
+  {
+   "id": "downlifter",
+   "file": "downlifter.wav",
+   "label": "Downlifter",
+   "category": "build",
+   "source": "synthesized",
+   "license": "CC0 (generated in-repo, no attribution required)"
+  },
+  {
+   "id": "error",
+   "file": "error.wav",
+   "label": "Error buzz",
+   "category": "digital",
+   "source": "synthesized",
+   "license": "CC0 (generated in-repo, no attribution required)"
+  },
+  {
+   "id": "glitch",
+   "file": "glitch.wav",
+   "label": "Glitch stutter",
+   "category": "digital",
+   "source": "synthesized",
+   "license": "CC0 (generated in-repo, no attribution required)"
+  },
+  {
+   "id": "heartbeat",
+   "file": "heartbeat.wav",
+   "label": "Heartbeat",
+   "category": "impact",
+   "source": "synthesized",
+   "license": "CC0 (generated in-repo, no attribution required)"
+  },
+  {
+   "id": "impact",
+   "file": "impact.wav",
+   "label": "Impact hit",
+   "category": "impact",
+   "source": "synthesized",
+   "license": "CC0 (generated in-repo, no attribution required)"
+  },
+  {
+   "id": "punch",
+   "file": "punch.wav",
+   "label": "Punch pop",
+   "category": "impact",
+   "source": "synthesized",
+   "license": "CC0 (generated in-repo, no attribution required)"
+  },
+  {
+   "id": "record-stop",
+   "file": "record-stop.wav",
+   "label": "Record stop",
+   "category": "meme",
+   "source": "synthesized",
+   "license": "CC0 (generated in-repo, no attribution required)"
+  },
+  {
+   "id": "riser",
+   "file": "riser.wav",
+   "label": "Riser",
+   "category": "build",
+   "source": "synthesized",
+   "license": "CC0 (generated in-repo, no attribution required)"
+  },
+  {
+   "id": "sparkle",
+   "file": "sparkle.wav",
+   "label": "Sparkle",
+   "category": "accent",
+   "source": "synthesized",
+   "license": "CC0 (generated in-repo, no attribution required)"
+  },
+  {
+   "id": "static",
+   "file": "static.wav",
+   "label": "Static burst",
+   "category": "digital",
+   "source": "synthesized",
+   "license": "CC0 (generated in-repo, no attribution required)"
+  },
+  {
+   "id": "sub-drop",
+   "file": "sub-drop.wav",
+   "label": "Sub drop",
+   "category": "impact",
+   "source": "synthesized",
+   "license": "CC0 (generated in-repo, no attribution required)"
+  },
+  {
+   "id": "swipe",
+   "file": "swipe.wav",
+   "label": "Swipe",
+   "category": "transition",
+   "source": "synthesized",
+   "license": "CC0 (generated in-repo, no attribution required)"
+  },
+  {
+   "id": "typewriter",
+   "file": "typewriter.wav",
+   "label": "Typewriter click",
+   "category": "accent",
+   "source": "synthesized",
+   "license": "CC0 (generated in-repo, no attribution required)"
+  },
+  {
+   "id": "vinyl-scratch",
+   "file": "vinyl-scratch.wav",
+   "label": "Record scratch",
+   "category": "meme",
+   "source": "synthesized",
+   "license": "CC0 (generated in-repo, no attribution required)"
+  },
+  {
+   "id": "whoosh-slow",
+   "file": "whoosh-slow.wav",
+   "label": "Slow airy whoosh",
+   "category": "transition",
+   "source": "synthesized",
+   "license": "CC0 (generated in-repo, no attribution required)"
+  },
+  {
+   "id": "whoosh",
+   "file": "whoosh.wav",
+   "label": "Whoosh",
+   "category": "transition",
+   "source": "synthesized",
+   "license": "CC0 (generated in-repo, no attribution required)"
+  }
+ ]
+}
