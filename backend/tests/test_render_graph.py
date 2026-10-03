@@ -100,12 +100,34 @@ def _assert_graph_is_sane(graph: str) -> None:
     assert not missing, f"filter graph uses undefined labels {missing}\n{graph}"
     assert defined.count("vout") == 1 and defined.count("aout") == 1, \
         f"expected exactly one [vout]/[aout]\n{graph}"
-    assert graph.strip().endswith("format=yuv420p[vout]") is False or True  # shape varies
+    # delivery is square-pixel 9:16 — ffmpeg would otherwise keep the DAR of a
+    # non-proportional crop (the shake window squeezed the frame by ~2.8%)
+    vout = next((seg for seg in _segments(graph) if seg.rstrip().endswith("[vout]")), "")
+    assert vout.endswith("setsar=1,format=yuv420p[vout]"), \
+        f"the video chain must normalise the sample aspect ratio\n{graph}"
     for pad in ("[vout]", "[aout]"):
         assert pad in graph
 
 
 # ------------------------------------------------------------------ cases
+def test_crop_and_shake_normalise_the_sample_aspect_ratio(captured, project):
+    """4K sources hit this: an odd crop (1215) wobbles the SAR, and the shake
+    window's crop+scale pair squeezes the frame unless it is normalised."""
+    job, call = _render_and_capture(
+        captured, project["id"], {"start": 0.0, "end": 8.0},
+        {"style": "meme", "aspect": "crop", "vfx": ["shake"], "music": "none",
+         "sfx": False, "captions": False, "resolution": "720", "fast": True})
+    assert job["status"] == "done", job
+    graph = _graph(call)
+    _assert_graph_is_sane(graph)
+    # even crop dimensions keep the scaler on whole pixels
+    assert "2*floor(min(iw,ih*9/16)/2)" in graph
+    assert "2*floor(min(ih,iw*16/9)/2)" in graph
+    # ...and the shake window is followed by the one normalising setsar=1
+    assert graph.count("setsar=1") == 1
+    assert "crop=678:1238" not in graph or "setsar=1" in graph
+
+
 def test_music_only_render_has_no_dangling_labels(captured, project):
     """The regression that motivated these tests: music, no memes, no overlays."""
     job, call = _render_and_capture(

@@ -3,7 +3,7 @@ SHELL := /bin/bash
 PORT ?= 8000
 IMAGE ?= clipper-ai
 
-.PHONY: help deps build dev run preview seed api overlays docker docker-run up down test smoke clean packs sfx
+.PHONY: help deps build dev run preview seed api overlays docker docker-run up down test smoke clean packs sfx memes
 
 help: ## show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -23,7 +23,7 @@ api: ## run the API (serves the SPA if it has been built)
 
 run: build api ## build the SPA then serve everything on :$(PORT)
 
-preview: deps build api ## restore everything (ffmpeg + model + deps + SPA) then serve
+preview: deps build memes api ## restore everything (ffmpeg + model + deps + SPA + meme placeholders) then serve
 
 seed: ## create the bundled sample project and render its top clip
 	python3 scripts/seed_preview.py
@@ -33,6 +33,9 @@ overlays: ## regenerate the built-in overlay loops (assets/overlays/*.mp4)
 
 sfx: ## (re)build the committed offline VFX kit (assets/sfx/kit, no network)
 	python3 scripts/make_sfx_pack.py
+
+memes: ## (re)build the offline meme placeholders (assets/memes, no key needed)
+	python3 scripts/make_meme_pack.py
 
 packs: ## fetch the real packs: Pixabay VFX sounds + Vlipsy memes (needs network/keys)
 	python3 scripts/fetch_packs.py --sound

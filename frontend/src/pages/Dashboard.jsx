@@ -65,7 +65,16 @@ export default function Dashboard({ health, notify, onOpen }) {
         </div>
 
         <div className="hero-cols">
-          <VideoUploader onUploaded={onOpen} maxUploadMb={health?.max_upload_mb} notify={notify} />
+          {/* onOpen takes a project *id*; the uploader hands back the created
+              project, so unwrap it here — passing the object straight through
+              navigated to /editor/[object Object] and 404'd. */}
+          <VideoUploader
+            onUploaded={(p) => (p?.id
+              ? onOpen(p.id)
+              : notify('Upload finished, but the server returned no project id — check the list below', 'error'))}
+            maxUploadMb={health?.max_upload_mb}
+            notify={notify}
+          />
 
           <div className="hero-side">
             <div className="card sample-card">

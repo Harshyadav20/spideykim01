@@ -64,6 +64,35 @@ The kit is deterministic: the same recipes always produce byte-identical files,
 and a test (`test_committed_kit_matches_the_recipes`) fails if a recipe changes
 without regenerating the committed `.wav` files.
 
+### Meme clips without a Vlipsy key
+
+Video clips are the one thing that cannot be committed (they are Vlipsy’s, not
+ours), so a fresh clone has an empty meme lab until you fetch them. To keep the
+lab usable on day one, this renders a **labelled stand-in per recipe** — a
+gradient card with the clip’s name and a `PLACEHOLDER — NOT A REAL CLIP` tag:
+
+```bash
+make memes                                  # or:
+python3 scripts/make_meme_pack.py           # 14 clips + 2 stings, ~20 s, no key
+python3 scripts/make_meme_pack.py --force   # re-render after a recipe change
+python3 scripts/make_meme_pack.py --list    # recipes: id, size, label
+```
+
+They are honest about what they are: the generated `pack.json` marks them
+`"source": "placeholder"` (CC0, generated in-repo), the pack row in the Meme lab
+reads *offline placeholders*, and the files stay out of git like every other
+fetched pack. `make preview` runs this automatically, so the one-command
+preview starts with a usable lab.
+
+Safety rails: the script **never overwrites a real clip** — a downloaded Vlipsy
+file, or your own MP4 dropped into `assets/memes/`, is left alone even with
+`--force` (use `--overwrite` if you really mean to replace it). Stings the
+committed VFX kit already wins (`boom`, `vinyl-scratch`) are skipped, because a
+second file for the same id would be shadowed anyway.
+
+A real fetch always takes precedence: run `scripts/fetch_packs.py --memes` and
+the downloaded clips replace the stand-ins id by id.
+
 ---
 
 ## 2. Fetch the real packs

@@ -109,7 +109,20 @@ const dom = new JSDOM(fs.readFileSync(INDEX, 'utf8'), {
   virtualConsole,
 })
 const { window } = dom
-window.fetch = (url, opts) => fetch(new URL(url, API).href, opts)
+// Every request the UI makes, so the test can prove it never asks the API for
+// a broken id (the `/api/projects/[object Object]` class of bug).
+const requests = []
+window.fetch = async (url, opts = {}) => {
+  const target = new URL(url, API).href
+  requests.push(target)
+  let body = opts.body
+  // jsdom Blobs aren't valid undici bodies — hand node a byte array instead
+  if (body && typeof body.arrayBuffer === 'function') {
+    body = Buffer.from(await body.arrayBuffer())
+    opts = { ...opts, body, duplex: 'half' }
+  }
+  return fetch(target, opts)
+}
 window.addEventListener('error', (e) => fail(`window.error: ${e.message}`))
 window.addEventListener('unhandledrejection', (e) => fail(`unhandled rejection: ${e.reason}`))
 
@@ -216,6 +229,39 @@ if (examples.length && !examples[0].disabled) {
 click($('.editor-head .btn.ghost'))
 await waitFor(() => window.document.querySelector('.dashboard'))
 check('navigates back to the dashboard', !!$('.dashboard'))
+
+// ─────────────────────────────────────────────────────── upload → editor
+// Regression: the uploader hands back the *project*, while onOpen takes an id.
+// Passing the object through navigated to /editor/[object Object] and the
+// editor then 404'd on /api/projects/[object Object].
+const sampleVideo = path.join(repoRoot, 'assets', 'samples', 'sample.mp4')
+const uploader = $('.uploader')
+if (!uploader) {
+  fail('the dashboard has no uploader')
+} else if (!fs.existsSync(sampleVideo)) {
+  skip('upload flow')
+} else {
+  const before = (await fetch(`${API}/api/projects`).then((r) => r.json()).catch(() => [])).length
+  const file = new window.File([fs.readFileSync(sampleVideo)], 'smoke upload.mp4',
+                              { type: 'video/mp4' })
+  const drop = new window.Event('drop', { bubbles: true, cancelable: true })
+  Object.defineProperty(drop, 'dataTransfer', { value: { files: [file] } })
+  uploader.dispatchEvent(drop)
+
+  const opened = await waitFor(() => window.document.querySelector('.editor-grid'),
+                               { timeout: 60000, interval: 250 })
+  check('uploading a video opens its editor', !!opened && !!$('.editor-grid'))
+  check('no request ever asks for a bogus project id',
+        !requests.some((u) => /\[object%20Object\]|\[object Object\]|undefined|\/null/.test(u)))
+
+  const after = await fetch(`${API}/api/projects`).then((r) => r.json()).catch(() => [])
+  check('the upload created a project named after the file',
+        after.length > before && after.some((p) => /^smoke upload/.test(p.name || '')))
+  // keep the demo server tidy — this project is test output, not user data
+  for (const p of after.filter((x) => /^smoke upload/.test(x.name || ''))) {
+    await fetch(`${API}/api/projects/${p.id}`, { method: 'DELETE' }).catch(() => {})
+  }
+}
 
 report()
 

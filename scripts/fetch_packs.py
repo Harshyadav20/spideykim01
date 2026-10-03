@@ -443,6 +443,7 @@ def check(sound_dir: Path, memes_dir: Path) -> None:
     print("   python3 scripts/fetch_packs.py --sound            # Pixabay VFX sounds")
     print("   python3 scripts/fetch_packs.py --memes --sounds   # Vlipsy memes + stings")
     print("   python3 scripts/make_sfx_pack.py                  # offline synth kit")
+    print("   python3 scripts/make_meme_pack.py                 # offline meme placeholders")
     print("   curl -X POST localhost:8000/api/packs/refresh      # make the API re-scan\n")
 
 

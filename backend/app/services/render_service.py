@@ -445,8 +445,10 @@ def render_clip(pid: str, clip: dict, options: dict,
         crop_fx = float(options.get("crop_x", 0.5))
         crop_fx = max(0.0, min(1.0, crop_fx))
         if aspect == "crop":
+            # even crop dimensions: an odd width leaves the scaler with a
+            # fractional SAR (a 4K source crops to 1215 → SAR 1214:1215)
             fparts.append(
-                f"{vcur}crop=w='min(iw,ih*9/16)':h='min(ih,iw*16/9)':"
+                f"{vcur}crop=w='2*floor(min(iw,ih*9/16)/2)':h='2*floor(min(ih,iw*16/9)/2)':"
                 f"x='(iw-ow)*{crop_fx:.3f}':y='(ih-oh)/2',"
                 f"scale={out_w}:{out_h}:flags=lanczos[v916]"
             )
@@ -585,7 +587,10 @@ def render_clip(pid: str, clip: dict, options: dict,
             )
             vcur = f"[vovl{k}]"
 
-        fparts.append(f"{vcur}format=yuv420p[vout]")
+        # every path above crops and rescales, and ffmpeg preserves DAR through
+        # a non-proportional crop+scale (the shake window, zoompan, odd crops).
+        # Delivery is 9:16 square-pixel, so normalise it here, once.
+        fparts.append(f"{vcur}setsar=1,format=yuv420p[vout]")
 
         # ---------------- audio (V6: audio-track elements) ----------------
         n_ovl = len(ovl_inputs) // 4

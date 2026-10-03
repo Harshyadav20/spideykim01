@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from .. import config
 from ..models import project as db
 from ..utils.ffmpeg import FFmpegError, probe
-from ..utils.files import ext_of, safe_stem
+from ..utils.files import display_name, ext_of, safe_stem
 from ..services.video_analyzer import make_thumbnail
 
 router = APIRouter(prefix="/api", tags=["projects"])
@@ -57,7 +57,9 @@ async def upload(file: UploadFile = File(...)):
 
 def _finalize_upload(dest: Path, filename: str, size: int, pid: str | None = None) -> dict:
     """Probe the finished file, create the project, kick analysis server-side."""
-    stem = safe_stem(filename or "video")
+    # the project's title is display-only (paths use `pid`), so keep the
+    # uploader's own words — safe_stem would flatten "अमित का पॉडकास्ट" to ""
+    title = display_name(filename or "video")
     pid = pid or db.new_id("prj")
     try:
         meta = probe(dest)
@@ -68,7 +70,7 @@ def _finalize_upload(dest: Path, filename: str, size: int, pid: str | None = Non
         dest.unlink(missing_ok=True)
         raise HTTPException(400, "Could not read duration — is this a video file?")
     meta["size"] = size
-    db.create_project(stem, filename or stem, str(dest), meta, pid=pid)
+    db.create_project(title, filename or title, str(dest), meta, pid=pid)
     make_thumbnail(pid)
     # analysis starts server-side immediately — no dependency on the browser
     from .clips import start_analysis

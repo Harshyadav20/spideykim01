@@ -63,7 +63,10 @@ cd backend
 PYTHONPATH=vendor python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000
 # open http://localhost:8000
 
-# 4. optional: the real asset packs (the offline VFX kit is already installed)
+# 4. optional: meme-clip stand-ins so the lab is usable without a Vlipsy key
+make memes
+
+# 5. optional: the real asset packs (the offline VFX kit is already installed)
 python3 scripts/fetch_packs.py --sound            # Pixabay VFX sounds
 VLIPSY_API_KEY=… python3 scripts/fetch_packs.py --memes --sounds   # Vlipsy memes
 curl -X POST localhost:8000/api/packs/refresh     # or click ↻ in the Meme lab
@@ -192,6 +195,10 @@ Full walkthrough, other hosts (Fly.io, Railway, VPS + nginx) and troubleshooting
   three marked *offline* need no downloads at all.
 - **7 new meme-face styles** — Meme (wow), Impact Meme, Subtitle Meme, Deep
   Fried, Sticker Band drive the caption layout those presets expect.
+- **Offline meme placeholders** — with no Vlipsy key, `make memes` renders a
+  clearly-labelled stand-in per recipe (gradient card + `PLACEHOLDER` tag) so
+  the lab, the presets and the renderer work on a fresh clone; a real fetch
+  replaces them id by id, and the script never overwrites a real clip.
 - **Meme inserts (Vlipsy)** — full-frame punches, contained stickers or a
   banded insert; pop-in animation, per-insert volume and sting, optional
   "every N seconds" repetition. The clip's own audio is mixed in, and the mix

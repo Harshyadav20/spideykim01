@@ -418,6 +418,11 @@ def packs() -> dict:
         builtin = [s for s in all_sfx if s["pack"] == "builtin"]
         memes = list_memes()
         meme_sounds = [s for s in all_sfx if s["pack"] == "memes"]
+        memes_manifest = _manifest(config.MEMES_DIR)
+        memes_source = str(memes_manifest.get("source") or "local").lower()
+        memes_label = {"placeholder": "Meme clips (offline placeholders)",
+                       "vlipsy": "Vlipsy meme pack (fetched)"}.get(
+                           memes_source, "Meme clips (Vlipsy or your own)")
         return {
             "builtin_sfx": _pack_info(
                 "builtin", "Built-in stings", config.SFX_DIR, builtin,
@@ -440,19 +445,23 @@ def packs() -> dict:
                 "Kept out of git (the license allows use, not redistribution).",
                 _manifest(config.SFX_VFX_DIR), winners),
             "memes": _pack_info(
-                "memes", "Vlipsy meme pack (fetched)", config.MEMES_DIR, memes,
-                "local", "https://vlipsy.com/",
+                "memes", memes_label, config.MEMES_DIR, memes,
+                memes_source, "https://vlipsy.com/",
                 "Vlipsy clips — check each clip's terms; keep them out of git",
-                "VLIPSY_API_KEY=… python3 scripts/fetch_packs.py --memes",
-                "Requires a Vlipsy developer key (api@vlipsy.com) or your own "
-                "MP4s dropped into assets/memes/.",
-                _manifest(config.MEMES_DIR)),
+                "VLIPSY_API_KEY=… python3 scripts/fetch_packs.py --memes "
+                "(no key yet: python3 scripts/make_meme_pack.py)",
+                "Requires a Vlipsy developer key (api@vlipsy.com). Without one, "
+                "`make memes` renders labelled offline placeholders, and your own "
+                "MP4s dropped into assets/memes/ work too.",
+                memes_manifest),
             "meme_sounds": _pack_info(
                 "meme_sounds", "Meme sound stings", config.MEMES_DIR, meme_sounds,
                 "local", "https://vlipsy.com/", "as above",
-                "VLIPSY_API_KEY=… python3 scripts/fetch_packs.py --memes --sounds",
-                "Vlipsy audio-only downloads (or Pixabay FX saved as "
-                "assets/memes/<name>.mp3)."),
+                "VLIPSY_API_KEY=… python3 scripts/fetch_packs.py --memes --sounds "
+                "(offline: python3 scripts/make_meme_pack.py)",
+                "Vlipsy audio-only downloads, the offline placeholders, or "
+                "Pixabay FX saved as assets/memes/<name>.mp3.",
+                memes_manifest),
         }
 
     return _cached("packs", build)
