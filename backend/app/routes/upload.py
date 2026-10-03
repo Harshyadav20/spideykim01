@@ -118,13 +118,16 @@ class CompleteBody(BaseModel):
 
 @router.post("/upload/complete")
 def upload_complete(body: CompleteBody):
-    _require_ffmpeg()
+    # validate the request before the environment: an unknown upload id is a
+    # 404 whatever the state of ffmpeg is (CI has no ffmpeg, and 503 there was
+    # masking the real answer)
     d = CHUNKS_DIR / body.upload_id
     if not _ID_RE.match(body.upload_id) or not d.is_dir():
         raise HTTPException(404, "Unknown upload")
     parts = sorted(d.glob("*.part"))
     if not parts:
         raise HTTPException(400, "No chunks received")
+    _require_ffmpeg()                      # probing/thumbnailing needs it
     pid = db.new_id("prj")
     dest = config.UPLOADS_DIR / f"{pid}{ext_of(body.filename or '')}"
     size = 0
