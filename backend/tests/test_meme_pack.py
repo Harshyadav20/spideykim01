@@ -162,6 +162,25 @@ def test_build_spares_a_placeholder_that_was_replaced_by_hand(tmp_path):
     assert kept["source"] == "local", "an unlabelled file must not claim to be ours"
 
 
+def test_a_partial_run_does_not_orphan_the_other_placeholders(tmp_path):
+    """`--only shocked` must not relabel the rest as someone else's clips.
+
+    It did once: the untouched files fell back to "local", and the next full
+    run then refused to touch its own placeholders.
+    """
+    calls: list = []
+    meme_pack.build(tmp_path, runner=_fake_runner(calls))               # full
+    calls.clear()
+    meme_pack.build(tmp_path, only=["shocked"], force=True, stings=False,
+                    runner=_fake_runner(calls))                        # partial
+    again = meme_pack.build(tmp_path, runner=_fake_runner(calls))       # full again
+    assert again["protected"] == [] and again["other"] == []
+    assert again["created"] == [], "nothing to re-render"
+    manifest = json.loads((tmp_path / "pack.json").read_text())
+    sources = {f["source"] for f in manifest["files"]}
+    assert sources == {"placeholder"}, f"unexpected sources {sources}"
+
+
 def test_build_keeps_existing_placeholders_and_force_rewrites_them(tmp_path):
     calls: list = []
     first = meme_pack.build(tmp_path, only=["bruh"], stings=False,

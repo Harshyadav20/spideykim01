@@ -335,6 +335,7 @@ def _write_manifest(folder: Path, ours: set[str] | None = None) -> Path:
     """
     recipes_by_id = {r["id"]: r for r in recipes("clip") + recipes("sting")}
     previous = read_manifest(folder).get("files") or {}
+    foreign = protected(folder)
     files = []
     for f in sorted(folder.iterdir()):
         if not f.is_file() or f.suffix.lower() not in VIDEO_EXTS + AUDIO_EXTS:
@@ -343,9 +344,13 @@ def _write_manifest(folder: Path, ours: set[str] | None = None) -> Path:
         old_source = str((old or {}).get("source", "")).lower()
         real = bool(old) and old_source not in ("", "placeholder")
         recipe = recipes_by_id.get(f.stem)
-        # who owns this file: the caller's set, or everything uncredited when
-        # the caller claims the folder
-        ours_here = (not real) if ours is None else (f.stem in ours)
+        # who owns this file:
+        #   * `ours` — generated or verified by this run (a partial run must not
+        #     relabel the placeholders it did not touch)
+        #   * not `foreign` — the manifest already vouches for it, size and all
+        #   * with no `ours` at all, the caller is claiming the whole folder
+        ours_here = (not real) if ours is None else (
+            f.stem in ours or f.stem not in foreign)
         if ours_here:
             files.append({
                 "id": f.stem, "file": f.name,
@@ -447,11 +452,15 @@ def build(folder: Path | None = None, force: bool = False,
             else:
                 failed.append({"id": sid, "error": err or "unknown error"})
     _write_manifest(folder, ours=set(created) | set(kept))
+    planned = {i["id"] for i in plan(folder, only=only, stings=stings,
+                                     include_kit_ids=include_kit_ids)}
     return {
         "folder": str(folder),
         "created": created,
         "kept": kept,
         "protected": sorted(blocked),
+        # files in the folder this run knows nothing about (your own clips)
+        "other": sorted(keep - planned),
         "failed": failed,
         "skipped_kit": sorted(kit_ids()) if not include_kit_ids else [],
         "total": _count(folder),

@@ -74,6 +74,9 @@ def main() -> int:
     if result["protected"]:
         print(f"kept    {len(result['protected'])} real file(s): "
               f"{', '.join(result['protected'])} (left alone; --overwrite replaces them)")
+    if result.get("other"):
+        print(f"found   {len(result['other'])} other file(s), left alone: "
+              f"{', '.join(result['other'])}")
     if result.get("skipped_kit"):
         print(f"skipped {len(result['skipped_kit'])} id(s) the VFX kit already ships "
               "(--all-stings overrides)")
