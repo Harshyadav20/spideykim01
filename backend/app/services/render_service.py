@@ -215,7 +215,7 @@ def _vfx_filters(vfx: list[str], intensity: float, out_w: int, out_h: int,
             f"crop={out_w - 2 * pad}:{out_h - 2 * pad}:"
             f"x='{pad}+{amp}*sin(13.7*t)+{amp // 2}*sin(31.1*t)':"
             f"y='{pad}+{amp}*cos(11.3*t)+{amp // 2}*sin(27.7*t)',"
-            f"scale={out_w}:{out_h}"
+            f"scale={out_w}:{out_h},setsar=1"
         )
     if "glitch" in vfx:
         shift = max(2, int(round(2 + 10 * intensity)))
@@ -450,7 +450,7 @@ def render_clip(pid: str, clip: dict, options: dict,
             fparts.append(
                 f"{vcur}crop=w='2*floor(min(iw,ih*9/16)/2)':h='2*floor(min(ih,iw*16/9)/2)':"
                 f"x='(iw-ow)*{crop_fx:.3f}':y='(ih-oh)/2',"
-                f"scale={out_w}:{out_h}:flags=lanczos[v916]"
+                f"scale={out_w}:{out_h}:flags=lanczos,setsar=1[v916]"
             )
         elif aspect == "blur":
             fparts.append(
@@ -458,12 +458,12 @@ def render_clip(pid: str, clip: dict, options: dict,
                 f"[bga]scale={out_w}:{out_h}:force_original_aspect_ratio=increase,"
                 f"crop={out_w}:{out_h},boxblur=24:2,gblur=sigma=6[bg];"
                 f"[fga]scale={out_w}:{out_h}:force_original_aspect_ratio=decrease[fg];"
-                f"[bg][fg]overlay=(W-w)/2:(H-h)/2[v916]"
+                f"[bg][fg]overlay=(W-w)/2:(H-h)/2,setsar=1[v916]"
             )
         else:  # fit
             fparts.append(
                 f"{vcur}scale={out_w}:{out_h}:force_original_aspect_ratio=decrease,"
-                f"pad={out_w}:{out_h}:(ow-iw)/2:(oh-ih)/2:color=black[v916]"
+                f"pad={out_w}:{out_h}:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1[v916]"
             )
         vcur = "[v916]"  # the transform consumed the previous label
 

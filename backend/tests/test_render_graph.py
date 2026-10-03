@@ -94,6 +94,50 @@ def _graph(call: dict) -> str:
     return args[args.index("-filter_complex") + 1]
 
 
+def _defining_segment(graph: str, label: str) -> tuple[str, list[str]]:
+    """(the chain that defines `label`, the labels that chain consumes)."""
+    for seg in reversed(_segments(graph)):
+        tail = re.search(r"((?:\[[^\]]+\])+)$", seg)
+        if not tail or label not in LABEL.findall(tail.group(1)):
+            continue
+        return seg, LABEL.findall(seg[:tail.start()])
+    return "", []
+
+
+def _assert_concat_inputs_are_uniform(graph: str) -> None:
+    """ffmpeg refuses to concat links whose parameters differ.
+
+    A crop+scale inside one FX window leaves that branch with a different sample
+    aspect ratio than its neighbours, which fails the render with
+    "Input link in0:v0 parameters … do not match the corresponding output link".
+    So every concat input must resolve — through any pass-through stages — to a
+    chain that either never touched the geometry, or resized *and* normalised.
+    """
+    concats = [seg for seg in _segments(graph) if "concat=" in seg and "v=1" in seg]
+    checked = 0
+    for seg in concats:
+        for name in LABEL.findall(seg[:seg.index("concat=")]):
+            seen: set[str] = set()
+            cur, saw_resize = name, False
+            while cur and cur not in seen:
+                seen.add(cur)
+                chain, consumed = _defining_segment(graph, cur)
+                if not chain:
+                    break
+                if re.search(r"\b(crop|scale|pad|zoompan)=", chain):
+                    assert "setsar=1" in chain, (
+                        f"concat input [{name}] passes through a chain that resizes "
+                        f"without normalising the sample aspect ratio — ffmpeg will "
+                        f"refuse this graph\n{chain}")
+                    saw_resize = True
+                    break
+                cur = consumed[0] if consumed else ""
+            assert saw_resize or not cur, f"unresolved concat input [{name}]"
+            checked += 1
+    if concats:
+        assert checked, "a concat had no input we could follow — the shape changed"
+
+
 def _assert_graph_is_sane(graph: str) -> None:
     defined, used = _labels(graph)
     missing = [name for name in used if name not in defined and not EXTERNAL.match(name)]
@@ -105,6 +149,7 @@ def _assert_graph_is_sane(graph: str) -> None:
     vout = next((seg for seg in _segments(graph) if seg.rstrip().endswith("[vout]")), "")
     assert vout.endswith("setsar=1,format=yuv420p[vout]"), \
         f"the video chain must normalise the sample aspect ratio\n{graph}"
+    _assert_concat_inputs_are_uniform(graph)
     for pad in ("[vout]", "[aout]"):
         assert pad in graph
 
@@ -123,9 +168,52 @@ def test_crop_and_shake_normalise_the_sample_aspect_ratio(captured, project):
     # even crop dimensions keep the scaler on whole pixels
     assert "2*floor(min(iw,ih*9/16)/2)" in graph
     assert "2*floor(min(ih,iw*16/9)/2)" in graph
-    # ...and the shake window is followed by the one normalising setsar=1
-    assert graph.count("setsar=1") == 1
-    assert "crop=678:1238" not in graph or "setsar=1" in graph
+    # ...and the shake window normalises its own re-frame
+    assert "scale=720:1280,setsar=1" in graph
+
+
+def test_shake_inside_an_fx_window_keeps_the_concat_uniform(captured, project):
+    """The bug report: "Input link in0:v0 parameters … do not match".
+
+    An FX window splits the stream; the branch with `shake` crops and rescales
+    (non-proportionally), so it used to hold a different SAR than the branches
+    that pass through, and the concat refused the graph.
+    """
+    timeline = {
+        "video": [{"id": "v1", "start": 0.0, "end": 10.0}],
+        "fx": [{"id": "w1", "kind": "vfx", "name": "shake", "t0": 2.0, "t1": 5.0},
+               {"id": "w2", "kind": "vfx", "name": "glitch", "t0": 6.0, "t1": 8.0}],
+        "audio": [],
+    }
+    job, call = _render_and_capture(
+        captured, project["id"], {"start": 0.0, "end": 10.0},
+        {"style": "meme", "aspect": "crop", "captions": False, "music": "none",
+         "sfx": False, "resolution": "720", "fast": True}, timeline)
+    assert job["status"] == "done", job
+    graph = _graph(call)
+    _assert_graph_is_sane(graph)
+    assert re.search(r"concat=n=\d+:v=1:a=0\[vfxw\]", graph), graph
+    # the branches carrying a shake are the ones that used to break the concat
+    shake_branches = [seg for seg in _segments(graph) if "crop=" in seg and "[pf" in seg]
+    assert shake_branches, "the shake window produced no branch"
+    for seg in shake_branches:
+        assert re.search(r"setsar=1\[pf\d+\]$", seg), seg
+
+
+def test_every_aspect_mode_normalises_before_the_window_split(captured, project):
+    """blur/fit/crop all feed the same split+concat, so all must be square."""
+    for aspect in ("crop", "blur", "fit"):
+        job, call = _render_and_capture(
+            captured, project["id"], {"start": 0.0, "end": 8.0},
+            {"style": "clean", "aspect": aspect, "captions": False, "music": "none",
+             "sfx": False, "resolution": "720", "fast": True,
+             "vfx": ["shake", "vignette"]},
+            {"video": [{"id": "v", "start": 0.0, "end": 8.0}],
+             "fx": [{"id": "w", "kind": "vfx", "name": "shake", "t0": 1.0, "t1": 3.0}],
+             "audio": []})
+        assert job["status"] == "done", (aspect, job)
+        graph = _graph(call)
+        _assert_graph_is_sane(graph)
 
 
 def test_music_only_render_has_no_dangling_labels(captured, project):
